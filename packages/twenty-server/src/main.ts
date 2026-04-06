@@ -10,6 +10,8 @@ import graphqlUploadExpress from 'graphql-upload/graphqlUploadExpress.mjs';
 
 import { NodeEnvironment } from 'src/engine/core-modules/twenty-config/interfaces/node-environment.interface';
 
+import { isDefined } from 'twenty-shared/utils';
+
 import { setPgDateTypeParser } from 'src/database/pg/set-pg-date-type-parser';
 import { LoggerService } from 'src/engine/core-modules/logger/logger.service';
 import { getSessionStorageOptions } from 'src/engine/core-modules/session-storage/session-storage.module-factory';
@@ -79,7 +81,15 @@ const bootstrap = async () => {
   // Inject the server url in the frontend page
   generateFrontConfig();
 
-  await app.listen(twentyConfigService.get('NODE_PORT'));
+  const rawPlatformPort = process.env.PORT;
+  const listenPort =
+    isDefined(rawPlatformPort) &&
+    rawPlatformPort !== '' &&
+    !Number.isNaN(Number.parseInt(rawPlatformPort, 10))
+      ? Number.parseInt(rawPlatformPort, 10)
+      : twentyConfigService.get('NODE_PORT');
+
+  await app.listen(listenPort);
 };
 
 bootstrap();
