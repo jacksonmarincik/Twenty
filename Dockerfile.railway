@@ -7,5 +7,5 @@
 FROM twentycrm/twenty:latest
 
 COPY railway-docker-entrypoint.sh /railway-docker-entrypoint.sh
-RUN chmod +x /railway-docker-entrypoint.sh
-ENTRYPOINT ["/railway-docker-entrypoint.sh"]
+# Base image ends with USER 1000; RUN chmod would run as non-root and fail.
+ENTRYPOINT ["/bin/sh", "/railway-docker-entrypoint.sh"]
