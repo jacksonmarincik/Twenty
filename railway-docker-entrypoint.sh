@@ -57,4 +57,20 @@ case "${REDIS_URL}" in
     ;;
 esac
 
+# Stock /app/entrypoint.sh only runs database:init:prod when the "core" schema is missing. If a
+# deploy was killed mid-migration (often healthcheck timeout), "core" exists but tables do not, so
+# init is skipped and the DB stays broken. Run init whenever the marker table is absent.
+core_app_token_exists=$(
+  psql "${PG_DATABASE_URL}" -tAc \
+    "SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'core' AND c.relkind = 'r' AND c.relname = 'appToken')" \
+    2>/dev/null | tr -d '[:space:]' || true
+)
+if [ -z "${core_app_token_exists}" ]; then
+  core_app_token_exists=f
+fi
+if [ "${core_app_token_exists}" != 't' ]; then
+  echo 'Railway: database not fully migrated; running database:init:prod...'
+  cd /app/packages/twenty-server && yarn database:init:prod
+fi
+
 exec /app/entrypoint.sh "$@"
