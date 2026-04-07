@@ -19,4 +19,17 @@ if [ -z "${PG_DATABASE_URL}" ]; then
   exit 1
 fi
 
+# Twenty validates SERVER_URL with require_protocol: true — hostnames without https:// fail.
+if [ -z "${SERVER_URL}" ] && [ -n "${RAILWAY_PUBLIC_DOMAIN}" ]; then
+  export SERVER_URL="https://${RAILWAY_PUBLIC_DOMAIN}"
+fi
+
+if [ -n "${SERVER_URL}" ]; then
+  trimmed_server_url=$(printf '%s' "${SERVER_URL}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+  case "${trimmed_server_url}" in
+    *://*) export SERVER_URL="${trimmed_server_url}" ;;
+    *) export SERVER_URL="https://${trimmed_server_url}" ;;
+  esac
+fi
+
 exec /app/entrypoint.sh "$@"
