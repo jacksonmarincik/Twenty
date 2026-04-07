@@ -1,8 +1,8 @@
 # Production image for PaaS (Railway, etc.). Do not use `yarn start` there — it runs
 # dev servers and will fail health checks.
 #
-# Railway: Postgres + Redis, APP_SECRET, REDIS_URL; DATABASE_URL → PG_DATABASE_URL.
-# SERVER_URL must be https://… (or omit it and we use https://$RAILWAY_PUBLIC_DOMAIN).
+# Railway: Postgres (DATABASE_URL), Redis (REDIS_URL from Redis service — redis://…, not web domain),
+# APP_SECRET; DATABASE_URL → PG_DATABASE_URL. SERVER_URL: https://… or omit (RAILWAY_PUBLIC_DOMAIN).
 # (https://your-app.up.railway.app), APP_SECRET, and optionally a second service with the
 # same image running: yarn worker:prod (see packages/twenty-docker/docker-compose.yml).
 FROM twentycrm/twenty:latest

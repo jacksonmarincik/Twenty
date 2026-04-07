@@ -32,4 +32,29 @@ if [ -n "${SERVER_URL}" ]; then
   esac
 fi
 
+# Redis is a separate in-memory service (not your public website). Twenty needs a URL that
+# starts with redis:// or rediss:// from Railway's Redis resource — not your *.up.railway.app web address.
+if [ -z "${REDIS_URL}" ] && [ -n "${REDIS_PRIVATE_URL}" ]; then
+  export REDIS_URL="${REDIS_PRIVATE_URL}"
+fi
+
+if [ -z "${REDIS_URL}" ]; then
+  echo 'error: REDIS_URL is not set.' >&2
+  echo 'In Railway: add a Redis service to this project. On your Twenty service → Variables →' >&2
+  echo 'New variable → Variable Reference → choose Redis → REDIS_URL (starts with redis://).' >&2
+  exit 1
+fi
+
+trimmed_redis_url=$(printf '%s' "${REDIS_URL}" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+export REDIS_URL="${trimmed_redis_url}"
+case "${REDIS_URL}" in
+  redis://*|rediss://*) ;;
+  *)
+    echo 'error: REDIS_URL must be a Redis connection string (starts with redis:// or rediss://).' >&2
+    echo "You currently have something that looks like a website hostname, not Redis. Remove that value." >&2
+    echo 'Add a Redis database in Railway, then set REDIS_URL to a Variable Reference from that Redis service.' >&2
+    exit 1
+    ;;
+esac
+
 exec /app/entrypoint.sh "$@"
