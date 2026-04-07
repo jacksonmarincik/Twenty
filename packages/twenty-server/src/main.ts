@@ -89,7 +89,8 @@ const bootstrap = async () => {
       ? Number.parseInt(rawPlatformPort, 10)
       : twentyConfigService.get('NODE_PORT');
 
-  await app.listen(listenPort);
+  // Bind all interfaces so PaaS health checks (e.g. Railway) can reach the port; default can be too restrictive in containers.
+  await app.listen(listenPort, '0.0.0.0');
 };
 
 bootstrap();
