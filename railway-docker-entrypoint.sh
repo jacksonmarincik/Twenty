@@ -73,4 +73,11 @@ if [ "${core_app_token_exists}" != 't' ]; then
   cd /app/packages/twenty-server && yarn database:init:prod
 fi
 
+# Cron registration runs a full Nest CLI boot before the web server starts; on Railway that can
+# push total startup past the healthcheck window. Skip by default; set
+# DISABLE_CRON_JOBS_REGISTRATION=false if you need cron (or raise the healthcheck timeout).
+if [ -z "${DISABLE_CRON_JOBS_REGISTRATION+x}" ]; then
+  export DISABLE_CRON_JOBS_REGISTRATION=true
+fi
+
 exec /app/entrypoint.sh "$@"
