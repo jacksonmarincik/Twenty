@@ -5,6 +5,7 @@ import { messengerRequest } from '@/messenger/services/messengerApiClient';
 import { getMessengerSocket } from '@/messenger/services/messengerSocket';
 import { messengerTokenState } from '@/messenger/states/messengerAuthState';
 import {
+  MessengerAttachment,
   MessengerConversationRef,
   MessengerMessage,
 } from '@/messenger/types/messenger.types';
@@ -26,12 +27,23 @@ const leaveEvent = (ref: MessengerConversationRef): string =>
 const roomId = (ref: MessengerConversationRef): string =>
   ref.kind === 'channel' ? ref.channelId : ref.threadId;
 
+// Backend returns `dm_thread_id`; older clients may look at `thread_id`.
+// Handle both to stay compatible with any transport shape.
+const messageThreadId = (message: MessengerMessage): string | null | undefined =>
+  message.dm_thread_id ?? message.thread_id;
+
 const belongsToConversation = (
   message: MessengerMessage,
   ref: MessengerConversationRef,
 ): boolean => {
   if (ref.kind === 'channel') return message.channel_id === ref.channelId;
-  return message.thread_id === ref.threadId;
+  return messageThreadId(message) === ref.threadId;
+};
+
+export type SendMessagePayload = {
+  body?: string;
+  attachments?: MessengerAttachment[];
+  image_url?: string | null;
 };
 
 export const useMessengerMessages = (ref: MessengerConversationRef | null) => {
@@ -100,14 +112,22 @@ export const useMessengerMessages = (ref: MessengerConversationRef | null) => {
   }, [ref?.kind, ref?.kind === 'channel' ? ref.channelId : ref?.threadId, token]);
 
   const send = useCallback(
-    async (body: string): Promise<MessengerMessage | null> => {
-      if (ref === null || token === null || body.trim().length === 0) {
+    async (payload: SendMessagePayload): Promise<MessengerMessage | null> => {
+      if (ref === null || token === null) return null;
+      const body = (payload.body ?? '').trim();
+      const attachments = payload.attachments ?? [];
+      const imageUrl = payload.image_url ?? null;
+      if (body.length === 0 && attachments.length === 0 && imageUrl === null) {
         return null;
       }
       const path = listPath(ref);
       const created = await messengerRequest<MessengerMessage>(path, {
         method: 'POST',
-        body: { body },
+        body: {
+          body,
+          attachments,
+          image_url: imageUrl,
+        },
         token,
       });
       setMessages((prev) =>

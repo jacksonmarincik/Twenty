@@ -1,7 +1,10 @@
 import { styled } from '@linaria/react';
+import { useAtomValue } from 'jotai';
 import { FormEvent, useState } from 'react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
+import { currentUserState } from '@/auth/states/currentUserState';
+import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { useMessengerAuth } from '@/messenger/hooks/useMessengerAuth';
 
 const StyledWrapper = styled.div`
@@ -112,10 +115,19 @@ type Mode = 'signin' | 'register';
 
 export const MessengerSignInForm = () => {
   const { login, register } = useMessengerAuth();
+  const currentUser = useAtomValue(currentUserState);
+  const currentWorkspaceMember = useAtomValue(currentWorkspaceMemberState);
+  const defaultName = [
+    currentWorkspaceMember?.name?.firstName,
+    currentWorkspaceMember?.name?.lastName,
+  ]
+    .filter((part): part is string => typeof part === 'string' && part.length > 0)
+    .join(' ');
+
   const [mode, setMode] = useState<Mode>('signin');
-  const [email, setEmail] = useState<string>('');
+  const [email, setEmail] = useState<string>(currentUser?.email ?? '');
   const [password, setPassword] = useState<string>('');
-  const [name, setName] = useState<string>('');
+  const [name, setName] = useState<string>(defaultName);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
