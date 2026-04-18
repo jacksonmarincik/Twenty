@@ -5,7 +5,8 @@ echo "Injecting runtime environment variables into index.html..."
 CONFIG_BLOCK=$(cat << EOF
     <script id="twenty-env-config">
       window._env_ = {
-        REACT_APP_SERVER_BASE_URL: "$REACT_APP_SERVER_BASE_URL"
+        REACT_APP_SERVER_BASE_URL: "$REACT_APP_SERVER_BASE_URL",
+        REACT_APP_MESSENGER_BASE_URL: "$REACT_APP_MESSENGER_BASE_URL"
       };
     </script>
     <!-- END: Twenty Config -->

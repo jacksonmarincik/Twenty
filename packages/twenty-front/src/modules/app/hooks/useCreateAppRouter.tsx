@@ -28,6 +28,12 @@ const RecordShowPage = lazy(() =>
   })),
 );
 
+const MessengerPage = lazy(() =>
+  import('~/pages/messenger/MessengerPage').then((module) => ({
+    default: module.MessengerPage,
+  })),
+);
+
 const SignInUp = lazy(() =>
   import('~/pages/auth/SignInUp').then((module) => ({
     default: module.SignInUp,
@@ -217,6 +223,14 @@ export const useCreateAppRouter = (
             element={
               <LazyRoute>
                 <RecordShowPage />
+              </LazyRoute>
+            }
+          />
+          <Route
+            path={AppPath.MessengerPage}
+            element={
+              <LazyRoute>
+                <MessengerPage />
               </LazyRoute>
             }
           />

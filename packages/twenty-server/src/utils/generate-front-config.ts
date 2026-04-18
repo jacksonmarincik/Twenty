@@ -8,10 +8,16 @@ config({
 });
 
 export function generateFrontConfig(): void {
+  const messengerBaseUrl =
+    process.env.MESSENGER_BASE_URL ??
+    process.env.REACT_APP_MESSENGER_BASE_URL ??
+    '';
+
   const configObject = {
     window: {
       _env_: {
         REACT_APP_SERVER_BASE_URL: process.env.SERVER_URL,
+        REACT_APP_MESSENGER_BASE_URL: messengerBaseUrl,
       },
     },
   };

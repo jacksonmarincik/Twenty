@@ -114,6 +114,7 @@
     "react-router-dom": "^6.4.4",
     "react-textarea-autosize": "^8.4.1",
     "remark-gfm": "^4.0.1",
+    "socket.io-client": "^4.7.5",
     "transliteration": "^2.3.5",
     "twenty-sdk": "workspace:*",
     "twenty-shared": "workspace:*",
