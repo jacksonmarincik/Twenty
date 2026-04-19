@@ -12,6 +12,7 @@ import { MessengerUser } from '@/messenger/types/messenger.types';
 
 type LoginResponse = { user: MessengerUser; token: string };
 type RegisterResponse = { user: MessengerUser; message?: string };
+type SsoLoginArgs = { twentyAccessToken: string; email: string; name: string };
 
 export const useMessengerAuth = () => {
   const [token, setToken] = useAtom(messengerTokenState);
@@ -46,6 +47,21 @@ export const useMessengerAuth = () => {
     [],
   );
 
+  const ssoLogin = useCallback(
+    async ({ twentyAccessToken, email, name }: SsoLoginArgs): Promise<MessengerUser> => {
+      const res = await messengerRequest<LoginResponse>('/api/auth/sso', {
+        method: 'POST',
+        body: { email, name },
+        headers: { Authorization: `Bearer ${twentyAccessToken}` },
+      });
+      persistMessengerAuth(res.token, res.user);
+      setToken(res.token);
+      setUser(res.user);
+      return res.user;
+    },
+    [setToken, setUser],
+  );
+
   const logout = useCallback(() => {
     disconnectMessengerSocket();
     persistMessengerAuth(null, null);
@@ -68,5 +84,5 @@ export const useMessengerAuth = () => {
     }
   }, [token, setUser]);
 
-  return { token, user, login, register, logout, refreshMe };
+  return { token, user, login, register, logout, refreshMe, ssoLogin };
 };

@@ -16,6 +16,7 @@ type RequestOptions = {
   token?: string | null;
   body?: unknown;
   query?: Record<string, string | undefined>;
+  headers?: Record<string, string>;
 };
 
 const buildUrl = (
@@ -39,9 +40,10 @@ export const messengerRequest = async <T,>(
   path: string,
   opts: RequestOptions = {},
 ): Promise<T> => {
-  const { method = 'GET', token, body, query } = opts;
+  const { method = 'GET', token, body, query, headers: extraHeaders } = opts;
   const headers: Record<string, string> = {
     Accept: 'application/json',
+    ...(extraHeaders ?? {}),
   };
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
