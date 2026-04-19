@@ -1,11 +1,11 @@
 import { styled } from '@linaria/react';
-import { useAtomValue } from 'jotai';
 import { FormEvent, useState } from 'react';
 import { themeCssVariables } from 'twenty-ui/theme-constants';
 
 import { currentUserState } from '@/auth/states/currentUserState';
 import { currentWorkspaceMemberState } from '@/auth/states/currentWorkspaceMemberState';
 import { useMessengerAuth } from '@/messenger/hooks/useMessengerAuth';
+import { useAtomStateValue } from '@/ui/utilities/state/jotai/hooks/useAtomStateValue';
 
 const StyledWrapper = styled.div`
   align-items: center;
@@ -115,8 +115,8 @@ type Mode = 'signin' | 'register';
 
 export const MessengerSignInForm = () => {
   const { login, register } = useMessengerAuth();
-  const currentUser = useAtomValue(currentUserState);
-  const currentWorkspaceMember = useAtomValue(currentWorkspaceMemberState);
+  const currentUser = useAtomStateValue(currentUserState);
+  const currentWorkspaceMember = useAtomStateValue(currentWorkspaceMemberState);
   const defaultName = [
     currentWorkspaceMember?.name?.firstName,
     currentWorkspaceMember?.name?.lastName,
